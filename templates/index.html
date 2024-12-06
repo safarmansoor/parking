@@ -16,6 +16,15 @@
             </div>
         </form>
 
+        <!-- Bulk Add Projects Form -->
+        <form method="POST" action="/bulk_projects" enctype="multipart/form-data" class="mb-3">
+            <label>Upload Bulk Projects (CSV):</label>
+            <div class="input-group">
+                <input type="file" name="file" class="form-control" accept=".csv" required>
+                <button type="submit" class="btn btn-primary">Upload</button>
+            </div>
+        </form>
+
         <!-- Add Parking Number Form -->
         <form method="POST" action="/add_parking_number" class="mb-3">
             <div class="input-group">
@@ -27,6 +36,15 @@
                     {% endfor %}
                 </select>
                 <button type="submit" class="btn btn-success">Add Parking Number</button>
+            </div>
+        </form>
+
+        <!-- Bulk Add Parking Numbers Form -->
+        <form method="POST" action="/bulk_parking_numbers" enctype="multipart/form-data" class="mb-3">
+            <label>Upload Bulk Parking Numbers (CSV):</label>
+            <div class="input-group">
+                <input type="file" name="file" class="form-control" accept=".csv" required>
+                <button type="submit" class="btn btn-success">Upload</button>
             </div>
         </form>
 
@@ -53,9 +71,6 @@
                 {% endfor %}
             </tbody>
         </table>
-
-        <!-- Print Button -->
-        <button onclick="window.print()" class="btn btn-secondary mt-3">Print Table</button>
     </div>
 </body>
 </html>

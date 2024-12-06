@@ -18,6 +18,7 @@ def init_db():
         conn.commit()
 
 @app.route('/')
+
 def index():
     with sqlite3.connect(DATABASE) as conn:
         projects = conn.execute("SELECT * FROM projects").fetchall()
@@ -67,7 +68,11 @@ def bulk_projects():
             with open(file_path, newline='', encoding='utf-8') as csvfile:
                 reader = csv.reader(csvfile)
                 for row in reader:
-                    conn.execute("INSERT INTO projects (name) VALUES (?)", (row[0],))
+                    # Avoid duplicate projects
+                    conn.execute("""
+                        INSERT INTO projects (name) 
+                        SELECT ? WHERE NOT EXISTS 
+                        (SELECT 1 FROM projects WHERE name = ?)""", (row[0], row[0]))
             conn.commit()
         os.remove(file_path)
         flash('Bulk projects added successfully!')
@@ -90,11 +95,18 @@ def bulk_parking_numbers():
             with open(file_path, newline='', encoding='utf-8') as csvfile:
                 reader = csv.reader(csvfile)
                 for row in reader:
-                    conn.execute("INSERT INTO parking_numbers (number, project_id) VALUES (?, ?)", (row[0], row[1]))
+                    # Validate project_id and avoid duplicate parking numbers
+                    project_exists = conn.execute("SELECT 1 FROM projects WHERE id = ?", (row[1],)).fetchone()
+                    if project_exists:
+                        conn.execute("""
+                            INSERT INTO parking_numbers (number, project_id)
+                            SELECT ?, ? WHERE NOT EXISTS 
+                            (SELECT 1 FROM parking_numbers WHERE number = ?)""", (row[0], row[1], row[0]))
             conn.commit()
         os.remove(file_path)
         flash('Bulk parking numbers added successfully!')
     return redirect(url_for('index'))
+
 
 if __name__ == '__main__':
     init_db()

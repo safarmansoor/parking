@@ -1,7 +1,7 @@
 import os
 from flask import Flask, render_template, request, redirect, url_for, flash
 from reportlab.lib.pagesizes import landscape, A4
-from reportlab.pdfgen import canv
+from reportlab.pdfgen import canvas
 import sqlite3
 import csv
 

@@ -6,28 +6,56 @@
 </head>
 <body>
     <div class="container mt-5">
-        <h1>Stored Parking Numbers</h1>
-        <form method="POST" action="/add" class="mb-3">
-            <input type="text" name="number" placeholder="Enter Parking Number" class="form-control mb-2" required>
-            <button type="submit" class="btn btn-primary">Add Number</button>
+        <h1>Parking Numbers Management</h1>
+        
+        <!-- Add Project Form -->
+        <form method="POST" action="/add_project" class="mb-3">
+            <div class="input-group">
+                <input type="text" name="project_name" placeholder="New Parking Zone/Project Name" class="form-control" required>
+                <button type="submit" class="btn btn-primary">Add Project</button>
+            </div>
         </form>
+
+        <!-- Add Parking Number Form -->
+        <form method="POST" action="/add_parking_number" class="mb-3">
+            <div class="input-group">
+                <input type="text" name="number" placeholder="Enter Parking Number" class="form-control" required>
+                <select name="project_id" class="form-select" required>
+                    <option value="" disabled selected>Select Parking Zone</option>
+                    {% for project in projects %}
+                        <option value="{{ project[0] }}">{{ project[1] }}</option>
+                    {% endfor %}
+                </select>
+                <button type="submit" class="btn btn-success">Add Parking Number</button>
+            </div>
+        </form>
+
+        <!-- Parking Numbers Table -->
         <table class="table table-bordered">
             <thead>
                 <tr>
                     <th>ID</th>
                     <th>Parking Number</th>
+                    <th>Parking Zone</th>
+                    <th>Action</th>
                 </tr>
             </thead>
             <tbody>
-                {% for number in numbers %}
+                {% for parking in parking_numbers %}
                 <tr>
-                    <td>{{ number[0] }}</td>
-                    <td>{{ number[1] }}</td>
+                    <td>{{ parking[0] }}</td>
+                    <td>{{ parking[1] }}</td>
+                    <td>{{ parking[2] }}</td>
+                    <td>
+                        <a href="/delete_parking_number/{{ parking[0] }}" class="btn btn-danger btn-sm">Delete</a>
+                    </td>
                 </tr>
                 {% endfor %}
             </tbody>
         </table>
-        <button onclick="window.print()" class="btn btn-secondary">Print Table</button>
+
+        <!-- Print Button -->
+        <button onclick="window.print()" class="btn btn-secondary mt-3">Print Table</button>
     </div>
 </body>
 </html>

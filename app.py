@@ -1,5 +1,7 @@
 import os
 from flask import Flask, render_template, request, redirect, url_for, flash
+from reportlab.lib.pagesizes import landscape, A4
+from reportlab.pdfgen import canv
 import sqlite3
 import csv
 
@@ -106,6 +108,49 @@ def bulk_parking_numbers():
         os.remove(file_path)
         flash('Bulk parking numbers added successfully!')
     return redirect(url_for('index'))
+
+@app.route('/generate_pdf', methods=['GET'])
+def generate_pdf():
+    file_path = os.path.join(app.config['UPLOAD_FOLDER'], 'parking_numbers.pdf')
+    
+    with sqlite3.connect(DATABASE) as conn:
+        # Fetch parking numbers grouped by project
+        projects = conn.execute("""
+            SELECT projects.name, GROUP_CONCAT(parking_numbers.number, ', ') as parking_numbers
+            FROM projects
+            LEFT JOIN parking_numbers ON projects.id = parking_numbers.project_id
+            GROUP BY projects.id
+        """).fetchall()
+
+    # Create PDF
+    pdf = canvas.Canvas(file_path, pagesize=landscape(A4))
+    pdf.setFont("Helvetica", 12)
+
+    x, y = 50, 550  # Initial coordinates
+    for project_name, parking_numbers in projects:
+        pdf.drawString(x, y, f"Project: {project_name}")
+        y -= 20
+
+        # Split parking numbers into multiple lines if too long
+        if parking_numbers:
+            numbers = parking_numbers.split(", ")
+            lines = [", ".join(numbers[i:i + 10]) for i in range(0, len(numbers), 10)]
+            for line in lines:
+                pdf.drawString(x + 20, y, line)
+                y -= 20
+        else:
+            pdf.drawString(x + 20, y, "No parking numbers")
+            y -= 20
+
+        y -= 10  # Space between projects
+        if y < 50:  # Start new page if space runs out
+            pdf.showPage()
+            pdf.setFont("Helvetica", 12)
+            y = 550
+
+    pdf.save()
+
+    return redirect(f'/static/uploads/parking_numbers.pdf')
 
 
 if __name__ == '__main__':
